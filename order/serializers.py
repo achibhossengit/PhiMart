@@ -93,6 +93,11 @@ class CreateOrderSerializer(serializers.Serializer):
     # show something after creating order
     def to_representation(self, instance):
         return OrderSerializer(instance).data
+    
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status']
 
 class OrderItemSerializer(ModelSerializer):
     product = SimpleProductSerializer()

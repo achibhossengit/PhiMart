@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from order.serializers import CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, OrderSerializer, CreateOrderSerializer
+from order.serializers import CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, OrderSerializer, CreateOrderSerializer, UpdateOrderSerializer
 from order.models import Cart, CartItem, Order, OrderItem
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from order.permissions import IsCartOwnerUser
 
 # not inherite ListModelMixins
@@ -36,12 +36,19 @@ class CartItemViewSets(ModelViewSet):
 
 
 class OrderViewSets(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'delete', 'patch', 'head', 'options']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CreateOrderSerializer
+        if self.request.method == 'PATCH':
+            return UpdateOrderSerializer
         return OrderSerializer
+    
+    def get_permissions(self):
+        if self.request.method in ['DELETE', 'PATCH']:
+            return [IsAdminUser(),]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         if self.request.user.is_staff:
