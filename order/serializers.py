@@ -5,7 +5,7 @@ from rest_framework.serializers import ModelSerializer
 from product.models import Product
 from order.models import Order, OrderItem
 from users.models import User
-from order.services import OrderServices
+from order.services import OrderService
 
 class SimpleProductSerializer(ModelSerializer):
     class Meta:
@@ -84,7 +84,7 @@ class CreateOrderSerializer(serializers.Serializer):
         cart_id = validated_data['cart_id']
 
         try:
-            order = OrderServices.create_order(cart_id=cart_id, user_id=user_id)
+            order = OrderService.create_order(cart_id=cart_id, user_id=user_id)
             return order
         except ValueError as e:
             raise serializers.ValidationError(str(e))
@@ -98,6 +98,20 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['status']
+
+    def update(self, instance, validated_data):
+        user = self.context['user']
+        new_status = validated_data['status']
+
+        if new_status == Order.CANCELED:
+            return OrderService.cancel_order(user=user, order=instance)
+        
+        if not user.is_staff:
+            raise serializers.ValidationError({'detail': 'You are not permited to change this status!'})
+        
+        return super().update(instance, validated_data)
+
+
 
 class OrderItemSerializer(ModelSerializer):
     product = SimpleProductSerializer()

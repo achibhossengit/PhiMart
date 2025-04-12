@@ -1,8 +1,9 @@
 from order.models import Cart, Order, OrderItem
 from users.models import User
 from django.db import transaction
+from rest_framework.exceptions import PermissionDenied
 
-class OrderServices:
+class OrderService:
     @staticmethod
     def create_order(cart_id, user_id):
         with transaction.atomic():
@@ -28,3 +29,21 @@ class OrderServices:
 
             return order
     
+
+    @staticmethod
+    def cancel_order(order, user):
+        if user.is_staff:
+            order.status = Order.CANCELED
+            order.save()
+
+        if user != order.user:
+            raise PermissionDenied({'detail': 'You can change your own order status'})
+
+        if order.status == Order.DELIVERED:
+            raise ValueError({'detail': 'Your order already delevered!'})
+        
+        order.status = Order.CANCELED
+        order.save()
+        return order
+        
+        

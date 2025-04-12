@@ -46,7 +46,7 @@ class OrderViewSets(ModelViewSet):
         return OrderSerializer
     
     def get_permissions(self):
-        if self.request.method in ['DELETE', 'PATCH']:
+        if self.request.method == 'DELETE':
             return [IsAdminUser(),]
         return [IsAuthenticated()]
 
@@ -56,5 +56,5 @@ class OrderViewSets(ModelViewSet):
         return Order.objects.prefetch_related('items__product').filter(user=self.request.user)
     
     def get_serializer_context(self):
-        return {'user_id':self.request.user.id}
+        return {'user_id':self.request.user.id, 'user':self.request.user}
     

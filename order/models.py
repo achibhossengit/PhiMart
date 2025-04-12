@@ -27,16 +27,21 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
+    NOT_PAID = 'N'
+    READY_TO_SHIP = 'R'
+    SHIPPED = 'S'
+    DELIVERED = 'D'
+    CANCELED = 'C'
     STATUS_CHOICES = (
-        ('N', 'Not Paid'),
-        ('R', 'Ready to Ship'),
-        ('S', 'Shipped'),
-        ('D', 'Delivered'),
-        ('C', 'Canceled'),
+        (NOT_PAID, 'Not Paid'),
+        (READY_TO_SHIP, 'Ready To Ship'),
+        (SHIPPED, 'Shipped'),
+        (DELIVERED, 'Delivered'),
+        (CANCELED, 'Canceled'),
     )
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders') # required
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P')
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='N')
     total_price = models.DecimalField(max_digits=10, decimal_places=2) # required
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
