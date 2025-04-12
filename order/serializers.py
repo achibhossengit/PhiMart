@@ -5,6 +5,7 @@ from rest_framework.serializers import ModelSerializer
 from product.models import Product
 from order.models import Order, OrderItem
 from users.models import User
+from order.services import OrderServices
 
 class SimpleProductSerializer(ModelSerializer):
     class Meta:
@@ -30,6 +31,9 @@ class AddCartItemSerializer(ModelSerializer):
 
     def save(self, **kwargs):
         cart_id = self.context.get('cart_id')
+        if not cart_id:
+            raise serializers.ValidationError("Cart ID is missing in the context!")
+
         product_id = self.validated_data['product_id']
         quantity = self.validated_data['quantity']
         try:
@@ -79,32 +83,16 @@ class CreateOrderSerializer(serializers.Serializer):
         user_id = self.context['user_id']
         cart_id = validated_data['cart_id']
 
-        user = User.objects.get(pk=user_id)
-        cart = Cart.objects.get(pk=cart_id)
-        cart_items = cart.items.select_related('product').all()
-        total_price = sum([item.product.price * item.quantity for item in cart_items])
-        order = Order.objects.create(user=user, total_price=total_price)
+        try:
+            order = OrderServices.create_order(cart_id=cart_id, user_id=user_id)
+            return order
+        except ValueError as e:
+            raise serializers.ValidationError(str(e))
 
-        order_items = [
-            OrderItem(
-                order = order,
-                product = item.product,
-                quantity = item.quantity,
-                price = item.product.price,
-                total_price = item.product.price * item.quantity
-            )
-            for item in cart_items
-        ]
-        # [<OrderItem(1)>, <OrderItem(2),..>]
-        OrderItem.objects.bulk_create(order_items)
-        cart.delete()
 
-        return order
-    
     # show something after creating order
     def to_representation(self, instance):
         return OrderSerializer(instance).data
-
 
 class OrderItemSerializer(ModelSerializer):
     product = SimpleProductSerializer()

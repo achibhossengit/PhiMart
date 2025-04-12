@@ -30,6 +30,9 @@ class CartItemViewSets(ModelViewSet):
         elif self.request.method == 'PATCH':
             return UpdateCartItemSerializer
         return CartItemSerializer
+    
+    def get_serializer_context(self):
+        return {'cart_id':self.kwargs['cart_pk']}
 
 
 class OrderViewSets(ModelViewSet):
