@@ -28,18 +28,21 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     STATUS_CHOICES = (
-        ('P', 'Pending'),
+        ('N', 'Not Paid'),
+        ('R', 'Ready to Ship'),
         ('S', 'Shipped'),
         ('D', 'Delivered'),
+        ('C', 'Canceled'),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders') # required
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='P')
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2) # required
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Order {self.id} by {self.user.email}"
+        return f"Order {self.id} by {self.user.email} status- {self.status}"
 
 
 class OrderItem(models.Model):
@@ -47,6 +50,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
         return f"{self.quantity} × {self.product.name}"
