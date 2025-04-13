@@ -93,7 +93,6 @@ class CreateOrderSerializer(serializers.Serializer):
         except ValueError as e:
             raise serializers.ValidationError(str(e))
 
-
     # show something after creating order
     def to_representation(self, instance):
         return OrderSerializer(instance).data
@@ -102,20 +101,6 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['status']
-
-    # def update(self, instance, validated_data):
-    #     user = self.context['user']
-    #     new_status = validated_data['status']
-
-    #     if new_status == Order.CANCELED:
-    #         return OrderService.cancel_order(user=user, order=instance)
-        
-    #     if not user.is_staff:
-    #         raise serializers.ValidationError({'detail': 'You are not permited to change this status!'})
-        
-    #     return super().update(instance, validated_data)
-
-
 
 class OrderItemSerializer(ModelSerializer):
     product = SimpleProductSerializer()

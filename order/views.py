@@ -41,24 +41,23 @@ class CartItemViewSets(ModelViewSet):
 class OrderViewSets(ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'patch', 'head', 'options']
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
         order = self.get_object()
         OrderService.cancel_order(order=order, user=request.user)
         return Response({'status': 'Order canceled'})
 
-
     def get_serializer_class(self):
         if self.action == 'cancel':
             return EmptySerializer
-        if self.request.method == 'POST':
+        if self.action == 'create':
             return CreateOrderSerializer
-        if self.request.method == 'PATCH':
+        if self.action == 'partial_update':
             return UpdateOrderSerializer
         return OrderSerializer
     
     def get_permissions(self):
-        if self.request.method in ['DELETE', 'PATCH']:
+        if self.action in ['partial_update', 'destroy']:
             return [IsAdminUser(),]
         return [IsAuthenticated()]
 
