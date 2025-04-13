@@ -13,11 +13,16 @@ class CategorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return super().create(validated_data)
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['image']
 
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price', 'price_with_tax','stock', 'category','created_at', 'updated_at']
+        fields = ['id', 'name', 'description', 'price', 'price_with_tax','stock', 'category','created_at', 'updated_at', 'images']
 
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
 
@@ -29,10 +34,6 @@ class ProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Price could not be negetive!')
         else:
             return price
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['image']
 
 class SimpleUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(method_name='get_current_user_name')
