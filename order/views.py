@@ -1,10 +1,13 @@
 from django.shortcuts import render
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from order.serializers import CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, OrderSerializer, CreateOrderSerializer, UpdateOrderSerializer
+from order.serializers import CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, OrderSerializer, CreateOrderSerializer, UpdateOrderSerializer, EmptySerializer
 from order.models import Cart, CartItem, Order, OrderItem
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from order.permissions import IsCartOwnerUser
+from rest_framework.decorators import action
+from order.services import OrderService
+from rest_framework.response import Response
 
 # not inherite ListModelMixins
 class CartViewSets(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
@@ -38,7 +41,16 @@ class CartItemViewSets(ModelViewSet):
 class OrderViewSets(ModelViewSet):
     http_method_names = ['get', 'post', 'delete', 'patch', 'head', 'options']
 
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def cancel(self, request, pk=None):
+        order = self.get_object()
+        OrderService.cancel_order(order=order, user=request.user)
+        return Response({'status': 'Order canceled'})
+
+
     def get_serializer_class(self):
+        if self.action == 'cancel':
+            return EmptySerializer
         if self.request.method == 'POST':
             return CreateOrderSerializer
         if self.request.method == 'PATCH':
@@ -46,7 +58,7 @@ class OrderViewSets(ModelViewSet):
         return OrderSerializer
     
     def get_permissions(self):
-        if self.request.method == 'DELETE':
+        if self.request.method in ['DELETE', 'PATCH']:
             return [IsAdminUser(),]
         return [IsAuthenticated()]
 
