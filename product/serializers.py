@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from decimal import Decimal
-from product.models import Product,Category, Review
+from product.models import Product,Category, Review, ProductImage
 from django.contrib.auth import get_user_model
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -21,12 +21,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
     price_with_tax = serializers.SerializerMethodField(method_name='calculate_tax')
 
-    # Passing 'context' in the view is required for this field to generate proper hyperlinks.
-    # category = serializers.HyperlinkedRelatedField(
-    #     queryset = Category.objects.all(),
-    #     view_name = 'view_specific_category',
-    # )
-
     def calculate_tax(self, product):
         return round(product.price * Decimal(1.1), 2)
     # field lavel validation: validate_<field name>
@@ -35,7 +29,11 @@ class ProductSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Price could not be negetive!')
         else:
             return price
-        
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['image']
+
 class SimpleUserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(method_name='get_current_user_name')
     class Meta:
