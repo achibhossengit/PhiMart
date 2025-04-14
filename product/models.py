@@ -17,7 +17,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, help_text='It will automatically record product creation datetime') # help_text for swagger
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

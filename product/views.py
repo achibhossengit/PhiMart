@@ -12,18 +12,44 @@ from product.paginations import CustomPageNumberPagination
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from api.permissions import IsAdminOrReadonly, FullDjangoModelPermission
 from product.permissions import IsReviewAuthorOrReadonly
+from drf_yasg.utils import swagger_auto_schema
 
 
 
 class ProductViewsets(ModelViewSet):
+    """
+    API endpoint for manage product.
+    - Allow authenticated admin to create, update and delete product
+    - Allow anyone to access product list
+    - Support serching by name, description and category
+    - Support ordering by price and update_at
+    """
+
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
-    search_fields = ['name', 'description', 'category__name'] # double underscore: category_id is a related field of product but, category name isn't. so, category__name to access
+    search_fields = ['name', 'description', 'category__name']
     ordering_fields = ['price', 'updated_at']
     pagination_class = CustomPageNumberPagination
     permission_classes = [IsAdminOrReadonly]
+
+
+    @swagger_auto_schema(
+        operation_summary='Update product items ',
+        operation_description='Anyone can access this endpoint',
+        request_body=ProductSerializer,
+        responses={
+            201: ProductSerializer,
+            400: 'Bad Request'
+        }
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        """ Only admin can create a product"""
+        return super().create(request, *args, **kwargs)
 
 class ProductImageViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
