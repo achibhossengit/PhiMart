@@ -14,6 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
     class Meta:
         model = ProductImage
         fields = ['image']

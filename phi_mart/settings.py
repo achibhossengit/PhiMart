@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -132,6 +133,17 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Configarations for Cloudnary media file
+cloudinary.config( 
+    cloud_name = config('cloud_name'), 
+    api_key = config('cloudinary_api_key'), 
+    api_secret = config('api_secret'), # Click 'View API Keys' above to copy your API secret
+    secure=True
+)
+
+# media storage settings
+DEFAULT_FILE_STORAGE = 'couldinary_storage.storage.MediaCloudinaryStorage'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -182,3 +194,4 @@ SWAGGER_SETTINGS = {
       }
    }
 }
+
