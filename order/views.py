@@ -18,6 +18,9 @@ class CartViewSets(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, Gene
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Cart.objects.none()
+
         return Cart.objects.prefetch_related('items__product').filter(user=self.request.user)
 
 class CartItemViewSets(ModelViewSet):
@@ -25,7 +28,7 @@ class CartItemViewSets(ModelViewSet):
     permission_classes = [IsCartOwnerUser]
 
     def get_queryset(self):
-        return CartItem.objects.select_related('product').filter(cart_id=self.kwargs['cart_pk'])
+        return CartItem.objects.select_related('product').filter(cart_id=self.kwargs.get('cart_pk'))
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -35,7 +38,7 @@ class CartItemViewSets(ModelViewSet):
         return CartItemSerializer
     
     def get_serializer_context(self):
-        return {'cart_id':self.kwargs['cart_pk']}
+        return {'cart_id':self.kwargs.get('cart_pk')}
 
 
 class OrderViewSets(ModelViewSet):
@@ -62,6 +65,9 @@ class OrderViewSets(ModelViewSet):
         return [IsAuthenticated()]
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Order.objects.none()
+
         if self.request.user.is_staff:
             return Order.objects.prefetch_related('items__product').all()
         return Order.objects.prefetch_related('items__product').filter(user=self.request.user)

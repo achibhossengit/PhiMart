@@ -56,10 +56,10 @@ class ProductImageViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadonly]
     
     def get_queryset(self):
-        return ProductImage.objects.filter(product_id=self.kwargs['product_pk'])
+        return ProductImage.objects.filter(product_id=self.kwargs.get('product_pk'))
     
     def perform_create(self, serializer):
-        serializer.save(product_id=self.kwargs['product_pk'])
+        serializer.save(product_id=self.kwargs.get('product_pk'))
 
 class CategoryViewsets(ModelViewSet):
     permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
@@ -71,7 +71,7 @@ class ReviewViewsets(ModelViewSet):
     serializer_class = ReviewSerializer
 
     def get_queryset(self):
-        queryset = Review.objects.filter(product_id = self.kwargs['product_pk'])
+        queryset = Review.objects.filter(product_id = self.kwargs.get('product_pk'))
         return queryset
     
     # now we can also pass product from here
@@ -82,7 +82,7 @@ class ReviewViewsets(ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_serializer_context(self):
-        return {'product_id': self.kwargs['product_pk']}
+        return {'product_id': self.kwargs.get('product_pk')}
     
 
 # Building an API steps-
