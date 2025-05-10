@@ -84,8 +84,10 @@ INTERNAL_IPS = [
 WSGI_APPLICATION = 'phi_mart.wsgi.app'
 
 CORS_ALLOWED_ORIGINS = [
-    'https://phimart-five.vercel.app'
+    'http://localhost:5173'
 ]
+
+# CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Database
