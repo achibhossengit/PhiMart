@@ -17,6 +17,7 @@ SECRET_KEY = 'django-insecure-=z+r))-e%ep)a!r0k6iqoe_jqhoa=^(u*3ao5avy@jy92=5#xz
 DEBUG = False
 
 ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1']
+# ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'users.User'
 
 # Application definition
@@ -192,6 +193,9 @@ SIMPLE_JWT = {
 }
 
 DJOSER = {
+    'EMAIL_FRONTEND_PROTOCOL': config('EMAIL_FRONTEND_PROTOCOL'),
+    'EMAIL_FRONTEND_DOMAIN': config('EMAIL_FRONTEND_DOMAIN'),
+    'EMAIL_FRONTEND_SITE_NAME': config('EMAIL_FRONTEND_SITE_NAME'),
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
