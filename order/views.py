@@ -13,6 +13,7 @@ from rest_framework.decorators import api_view
 from sslcommerz_lib import SSLCOMMERZ 
 from django.conf import settings as django_settings
 from decouple import config
+from rest_framework.views import APIView
 
 
 # not inherite ListModelMixins
@@ -146,3 +147,11 @@ def fail_payment(request):
 @api_view(['POST'])
 def cancel_payment(request):
     return redirect(f"{django_settings.FRONT_END_HOST}dashboard/orders/")
+
+
+class HasOrderedProduct(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, product_id):
+        has_ordered = OrderItem.objects.filter(order__user = request.user, product_id = product_id).exists()
+        return Response({'hasOrdered':has_ordered})
