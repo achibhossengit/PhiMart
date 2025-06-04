@@ -1,5 +1,3 @@
-from django.shortcuts import render, get_object_or_404
-from rest_framework.decorators import api_view
 from product.models import Product, Category, Review, ProductImage
 from django.db.models import Count
 from product.serializers import ProductSerializer, CategorySerializer, ReviewSerializer, ProductImageSerializer
@@ -7,12 +5,12 @@ from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from product.filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.pagination import PageNumberPagination
 from product.paginations import CustomPageNumberPagination
 from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
-from api.permissions import IsAdminOrReadonly, FullDjangoModelPermission
+from api.permissions import IsAdminOrReadonly
 from product.permissions import IsReviewAuthorOrReadonly
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -85,8 +83,11 @@ class ReviewViewsets(ModelViewSet):
         return {'product_id': self.kwargs.get('product_pk')}
     
 
-# Building an API steps-
-# Create a Model
-# serializer
-# viewsets
-# router
+class ReviewByUserViewSets(ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReviewSerializer
+    http_method_names = ['get', 'put', 'delete']
+    pagination_class = CustomPageNumberPagination
+    
+    def get_queryset(self):
+        return Review.objects.filter(user=self.request.user)
